@@ -17,4 +17,12 @@ int selectSort(int *arr, int count);
  */
 int insertSort(int *arr, int count);
 
+/**
+ * @brief:o(n*n)
+ */
+int exchangeSort(int *arr, int count);
 
+/**
+ * @brief:o(logn)
+ */
+int quickSort(int *arr, int left, int right);
