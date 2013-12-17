@@ -1,6 +1,21 @@
 #include "bd_pcap_session.h"
 #include "pcap/pcap.h"
 
+static char errbuf[PCAP_ERRBUF_SIZE + 1];
+
+link_info_t datalink_table[] = {
+    {DLT_NULL, 0, 4},
+    {DLT_EN10MB, 12, 14},	
+    {DLT_EN3MB, -1, -1},	
+    {DLT_AX25, -1, -1},	
+    {DLT_PRONET, -1, -1},	
+    {DLT_CHAOS, -1, -1},	
+    {DLT_IEEE802, 14, 14},	
+    {DLT_ARCNET, 2, 6},	
+    {DLT_SLIP, -1, 16},	
+    {DLT_PPP, 2, 4},	
+    {DLT_FDDI, 13, 13}	
+};
 
 bd_pcap_session::bd_pcap_session()
 {

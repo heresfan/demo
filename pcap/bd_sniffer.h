@@ -9,27 +9,32 @@
 #define PROTO_IPV4  0x0800
 #define PROTO_IPV6  0x86DD
 #define PROTO_ARP   0x0806
-#define PROTO_IPX   0x8137
-#define PROTO_IPX2  0x8138
-#define PROTO_PPPDS 0x8863
-#define PROTO_PPPSS 0x8864
-#define PROTO_FCTRL 0x8808
+#define PROTO_IPX   0x8137 /*novell IPX*/
+#define PROTO_IPX2  0x8138 /*novell IPX*/
+#define PROTO_PPPDS 0x8863 /*PPPoE discovery stage*/
+#define PROTO_PPPSS 0x8864 /*PPPoE session stage*/
+#define PROTO_FCTRL 0x8808 /*flow control*/
 
-#define IPPROTO_ICMP  1
-#define IPPROTO_IGMP  2
-#define IPPROTO_TCP   6
-#define IPPROTO_UDP   17
+//#define IPPROTO_ICMP  1
+//#define IPPROTO_IGMP  2
+//#define IPPROTO_TCP   6
+//#define IPPROTO_UDP   17
 
 typedef void (*pkt_handler_t)(const u_char *packet);
 typedef bpf_u_int32 sniffer_addr_t;
 
 enum handler_type_e
 {
+    HANDLER_IPV4,
+    HANDLER_IPV6,
+    HANDLER_ARP,
+    HANDLER_PPPDS,
+    HANDLER_PPPSS,
+    HANDLER_FCTRL,
     HANDLER_TCP,
     HANDLER_UDP,
     HANDLER_ICMP,
     HANDLER_IGMP,
-    HANDLER_ARP,
     HANDLER_TYPE_MAX
 };
 
@@ -48,8 +53,8 @@ enum result_code_e
 
 struct ethernet_header
 {
-    uint8_t src_mac[6];
     uint8_t dst_mac[6];
+    uint8_t src_mac[6];
     union{
         uint16_t type;
         struct 
@@ -81,7 +86,8 @@ struct ip {
 	u_char	ip_ttl;			/* time to live */
 	u_char	ip_p;			/* protocol */
 	u_short	ip_sum;			/* checksum */
-	struct	in_addr ip_src,ip_dst;	/* source and dest address */
+	//struct	in_addr ip_src,ip_dst;	/* source and dest address */
+    u_int   ip_src, id_dst;
 };
 
 //typedef struct 
@@ -104,7 +110,7 @@ class bd_sniffer
         /**
          * @brief: get singleton instance
          */
-        bd_sniffer* getInstance();
+        static bd_sniffer& getInstance();
 
         /**
          * @brief: default destructor
@@ -148,12 +154,19 @@ class bd_sniffer
 
         /**
          * @brief: callback for pcap_loop
+         * Defined static for convenience of being
+         * a callback function, and for the sake of
+         * this, @a _handlers must be defined static
+         * as well.
+         * @param args User-defined args
+         * @param header Pcap header
+         * @param packet Pointer to captured packet
          */
-        void _l(u_char *args, const struct pcap_pkthdr *header, 
+        static void _l(u_char *args, const struct pcap_pkthdr *header, 
         const u_char *packet);
 
         bd_pcap_session *_sess;
-        pkt_handler_t _handlers[HANDLER_TYPE_MAX]; /* registered handler for processing captured packets */
+        static pkt_handler_t _handlers[HANDLER_TYPE_MAX]; /* registered handler for processing captured packets */
         uint8_t _init_flag;
 
         // singleton obj
